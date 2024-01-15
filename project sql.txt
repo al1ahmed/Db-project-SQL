@@ -1,0 +1,150 @@
+create table passengers(
+name        varchar(20) not null,
+cnic        char(13),
+phoneno     number    not null unique,
+ticketno    varchar(10),
+constraint  pass_pk     primary key(cnic)
+);
+
+create table driver(
+name        varchar(20) not null,
+cnic        char(13),
+dlicense    char(10)    not null unique,
+phoneno     number    not null unique,
+drives      varchar(10) not null,
+constraint  d_pk        primary key (cnic)
+);
+create table transport(
+noplate     varchar(10),
+year        number      not null,
+model       varchar(15) not null,
+make        varchar(15) not null,
+type        char        not null,
+freeseats   number      default 0,
+drivercnic  char(13)   ,
+constraint tr_pk primary key(noplate),
+constraint tr_fk foreign key(drivercnic) references driver(cnic)on delete set null
+);
+alter table driver
+add constraint d_fk foreign key (drives) references transport(noplate)on delete set null;
+create table stops(
+locationid  varchar(10),
+stopname    varchar(30)     not null,
+constraint s_pk primary key (locationid)
+);
+create table trastop(
+vehicle     varchar(10)     not null,
+stops        varchar(10)    not null,
+hours        number         not null,
+minutes      number         not null,
+constraint ts_1 foreign key(vehicle) references transport(noplate)on delete cascade,
+constraint ts_2 foreign key(stops) references stops(locationid)on delete cascade
+);
+create table ticket(
+class           char        not null,
+noplate         varchar(10) not null,
+ticketno        varchar(10),
+hours           number not  null,
+minutes         number not  null,
+source          varchar(10) not null,
+destination     varchar(10) not null,
+passenger_cnic  char(13)    not null,
+constraint tk_pk primary key (ticketno),
+constraint tk_fk1 foreign key(noplate) references transport(noplate)on delete cascade,
+constraint tk_fk2 foreign key(source) references stops(locationid)on delete set null,
+constraint tk_fk3 foreign key(destination) references stops(locationid)on delete set null,
+constraint tk_fk4 foreign key(passenger_cnic) references passengers(cnic)on delete cascade
+);
+alter table passengers
+add constraint pass_fk foreign key(ticketno) references ticket(ticketno)on delete set null;
+create table rates(
+ticket_class    char    ,
+vehicle_type    char,
+rate            number
+);
+create table rating(
+pass_cnic       char(13),
+driver_cnic     char(13),
+rating          number,
+constraint r_fk1 foreign key(pass_cnic) references passengers(cnic),
+constraint r_fk2 foreign key(driver_cnic) references driver(cnic)
+);
+--populalte
+alter table driver
+modify drives varchar(10) null;
+
+insert into passengers values('tariq','7423654789965',03338456547,NULL);
+insert into passengers values('ali','7754354789965',03338456548,NULL);
+insert into passengers values('owais','7663664980915',03339423470,NULL);
+insert into passengers values('hamza','7453624789760',03318254557,NULL);
+insert into passengers values('muneeb','7453057729567',03305436145,NULL);
+insert into passengers values('zubair','4365874691146',03025789426,NULL);
+
+insert into driver values('zahid','8456215698715','1234567890',03214569851,NULL);
+insert into driver values('aman','8756015681536','1224568789',03548462156,NULL);
+insert into driver values('hamid','8956321866134','6425468546',03456181685,NULL);
+insert into driver values('shahid','6568415468188','8146442250',03216518288,NULL);
+insert into driver values('owais','6546528486486','1641808343',03846828346,NULL);
+
+
+insert into stops values('khi1','saddar');
+insert into stops values('khi2','university_road');
+insert into stops values('khi3','aisha_manzil');
+insert into stops values('khi4','S_goth');
+insert into stops values('khi5','al_asif');
+insert into stops values('m9_1','m10_bridge');
+insert into stops values('m9_2','toll_plaza');
+insert into stops values('m9_3','nooriabad');
+insert into stops values('m9_4','jamshoro');
+insert into stops values('hyd','hyd_bypass');
+
+
+insert into transport values('AHA123',2000,'hiace','toyota','l',14,'6546528486486');
+insert into transport values('AHA124',2010,'hiace','toyota','l',14,'8956321866134');
+insert into transport values('AHB124',2005,'bus','yutong','E',50,'8756015681536');
+insert into transport values('AHB125',1997,'car','honda','E',4,'8456215698715');
+
+
+insert into ticket values('l','AHA123','A123',08,30,'khi1','hyd','7423654789965');
+insert into ticket values('e','AHB124','A121',10,00,'m9_3','hyd','7754354789965');
+insert into ticket values('e','AHB124','A120',09,30,'m9_1','m9_4','7663664980915');
+insert into ticket values('l','AHB125','A122',08,00,'khi1','hyd','7453624789760');
+insert into ticket values('l','AHA124','A125',09,00,'khi1','m9_2','4365874691146');
+
+
+insert into trastop values('AHA123','khi1',08,30);
+insert into trastop values('AHA123','khi2',09,00);
+insert into trastop values('AHA123','khi3',09,30);
+insert into trastop values('AHA123','khi4',10,00);
+insert into trastop values('AHA123','khi5',10,30);
+insert into trastop values('AHA123','m9_1',11,00);
+insert into trastop values('AHA123','m9_2',11,30);
+insert into trastop values('AHA123','m9_3',12,00);
+insert into trastop values('AHA123','m9_4',12,50);
+insert into trastop values('AHA123','hyd',13,00);
+insert into trastop values('AHA124','khi1',18,30);
+insert into trastop values('AHA124','khi2',19,00);
+insert into trastop values('AHA124','khi3',19,30);
+insert into trastop values('AHA124','khi4',20,00);
+insert into trastop values('AHA124','khi5',20,30);
+insert into trastop values('AHA124','m9_1',21,00);
+insert into trastop values('AHA124','m9_2',21,30);
+insert into trastop values('AHA124','m9_3',00,00);
+insert into trastop values('AHA124','m9_4',00,50);
+insert into trastop values('AHA124','hyd',01,00);
+insert into trastop values('AHB124','khi1',08,00);
+insert into trastop values('AHB124','khi5',10,00);
+insert into trastop values('AHB124','hyd',11,30);
+insert into trastop values('AHB125','khi1',18,00);
+insert into trastop values('AHB125','khi5',20,00);
+insert into trastop values('AHB125','hyd',21,30);
+
+insert into rates values('l','e',1000);
+insert into rates values('l','l',800);
+insert into rates values('e','e',600);
+insert into rates values('e','l',450);
+
+insert into rating values('7423654789965','8456215698715',8);
+insert into rating values('7754354789965','8456215698715',5);
+insert into rating values('7663664980915','8956321866134',5);
+insert into rating values('4365874691146','6568415468188',10);
